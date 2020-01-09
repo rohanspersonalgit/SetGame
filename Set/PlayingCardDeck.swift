@@ -21,6 +21,7 @@ struct PlayingCardDeck {
     var numDifferent: Bool
     var playedCards = [PlayingCard]()
     var validSoFar: Bool
+    var score: Int
     init(maxCards: Int) {
         for numShape in PlayingCard.NumShapes.all{
             for shape in PlayingCard.ShapeType.all{
@@ -38,7 +39,18 @@ struct PlayingCardDeck {
             playedCards.append(newCard)
         }
         validSoFar = true
-        numDifferent = false; colorDifferent = false ; shapeDifferent = false ; shadeDifferent = false;
+        numDifferent = false; colorDifferent = false ; shapeDifferent = false ; shadeDifferent = false; score=0;
+    }
+    
+    mutating func drawCard(numCards: Int) {
+        
+        if numCards<cards.count{            for _ in 1...numCards{
+            let randoNum = cards.count
+            var newCard = (cards.remove(at: randoNum.arc4random))
+            newCard.inGame = true
+            playedCards.append(newCard)
+            }}
+        
     }
     
     mutating func chooseCard(cardChose: Int){
@@ -59,7 +71,6 @@ struct PlayingCardDeck {
                 if(lastChose.numShapes != currChose.numShapes){
                     numDifferent = true
                 }
-                
                 if(lastChose.shape != currChose.shape){
                     shapeDifferent = true
                 }
@@ -69,47 +80,47 @@ struct PlayingCardDeck {
                 let firstChose = playedCards[chosenCards[0]]
                 let lastChose = playedCards[chosenCards[1]]
                 let currChose = playedCards[chosenCards[2]]
-                if(colorDifferent){
-                    if(firstChose.color == currChose.color || lastChose.color == currChose.color){
+                
+                if(firstChose.color == currChose.color && lastChose.color == currChose.color){
+                    if(colorDifferent){
                         validSoFar = false
                     }
                 }
-                if(shapeDifferent){
-                    if(firstChose.shape == currChose.shape || lastChose.shape == currChose.shape){
-                        validSoFar = false
-                    }
+                if(firstChose.shape == currChose.shape && lastChose.shape == currChose.shape){
+                    if shapeDifferent {validSoFar = false}
                 }
-                if(numDifferent){
-                    if(firstChose.numShapes == currChose.numShapes || lastChose.numShapes == currChose.numShapes){
-                        validSoFar = false
-                    }
+                
+                if(firstChose.numShapes == currChose.numShapes || lastChose.numShapes == currChose.numShapes){
+                    if numDifferent {validSoFar = false}
                 }
-                if(shadeDifferent){
-                    if(firstChose.shading == currChose.shading || lastChose.shading == currChose.shading){
-                        validSoFar = false
-                    }
+                if(firstChose.shading == currChose.shading || lastChose.shading == currChose.shading){
+                    if shadeDifferent {validSoFar = false}
                 }
                 if(validSoFar){
                     for each in chosenCards{
-                        playedCards[each].matched = true
+                        playedCards[each] = cards.remove(at: cards.count.arc4random)
+                        playedCards[each].inGame = true
                     }
+                    score += 3
                     chosenCards.removeAll()
                 }
                 else {
-                    validSoFar = true
+                    validSoFar = false
                     numDifferent = false
                     shadeDifferent = false
                     colorDifferent = false
                     shapeDifferent = false
                     for each in chosenCards{
                         playedCards[each].chosen = false
+                        playedCards[each].inGame = true
                     }
-                    
+                    score -= 5
                     chosenCards.removeAll()
                 }
             }
         }
         else {
+            score -= 1
             playedCards[cardChose].chosen = false
             if let remove = chosenCards.firstIndex(of: cardChose){
                 chosenCards.remove(at: remove)

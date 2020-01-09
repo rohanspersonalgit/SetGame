@@ -13,12 +13,30 @@ class ViewController: UIViewController {
     var cardsInPlay:Int { get {
         game.playedCards.count
         }}
+     //var grid: Grid = Grid(layout: Grid.Layout.dimensions(rowCount: 4, columnCount: 3))
     @IBOutlet  var cardButtons: [UIButton]!
+    @IBOutlet var setCardView: [SetCardView]!
     
+    @IBOutlet weak var gameScoreLabel: UILabel!
+    var gameScore = 0 {
+        didSet {
+            gameScoreLabel.text = "GameScore: \(gameScore)"
+        }
+    }
+    @IBOutlet weak var drawThree: UIButton!
+    
+    @IBAction func drawThreeCards() {
+        game.drawCard(numCards: 3)
+        updateViewFromModel()
+        print(game.playedCards)
+    }
     @IBAction func touchCard(_ sender: UIButton) {
         if let cardNumber = cardButtons.firstIndex(of: sender){
-            game.chooseCard(cardChose: cardNumber)
-            updateViewFromModel()
+            if cardNumber <= game.playedCards.count{
+                game.chooseCard(cardChose: cardNumber)
+                updateViewFromModel()
+            }
+            
         }
         
     }
@@ -29,11 +47,19 @@ class ViewController: UIViewController {
     }
     
     func updateViewFromModel(){
+//        if(grid.cellCount==game.playedCards.count){
+//            for _ in 0...setCardView.count{
+//                print("heleo")
+//            }
+//        }else {
+//            //resize!
+//        }
         for card in (cardButtons.indices){
             if (card > game.playedCards.count - 1 ){
                 cardButtons[card].backgroundColor = #colorLiteral(red: 0.9465195487, green: 1, blue: 0.9535968211, alpha: 0)
                 cardButtons[card].setTitle("", for: .normal)
             } else if game.playedCards[card].inGame, !game.playedCards[card].matched{
+                cardButtons[card].backgroundColor = UIColor.init(rgb: 0xf0ead6)
                 var coloring = UIColor(rgb: game.playedCards[card].color.rawValue)
                 var attributes: [NSAttributedString.Key: Any] = [
                     .font: UIFont.systemFont(ofSize: 10)
@@ -46,18 +72,27 @@ class ViewController: UIViewController {
                 else if (game.playedCards[card].shading == PlayingCard.Shade.open ){
                     attributes[.strokeWidth] = 10
                 }
+                if(game.playedCards[card].chosen){
+                    cardButtons[card].backgroundColor = UIColor.init(rgb: 0xf0ead6)
+                }
+                else {
+                    cardButtons[card].backgroundColor = UIColor.init(named: "white")
+                }
                 let attString = NSAttributedString(string: str, attributes: attributes)
                 cardButtons[card].setAttributedTitle(attString, for: .normal)
                 cardButtons[card].layer.borderWidth = 10.0
                 cardButtons[card].layer.borderColor = UIColor.init(rgb: game.playedCards[card].color.rawValue).cgColor
                 
             }
-            else {
+            else {  
                 cardButtons[card].layer.borderColor = #colorLiteral(red: 0.9465195487, green: 1, blue: 0.9535968211, alpha: 0)
                 cardButtons[card].backgroundColor = #colorLiteral(red: 0.9465195487, green: 1, blue: 0.9535968211, alpha: 0)
-                cardButtons[card].setTitle(" ", for: .normal)
+                let attString = NSAttributedString(string: "", attributes: [:])
+                cardButtons[card].setAttributedTitle(attString, for: .normal)
+                
             }
         }
+        gameScore = game.score
     }
 }
 
